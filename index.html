@@ -2,19 +2,18 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <!-- Оптимизированный viewport для iOS: запрет зума, корректное масштабирование -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <title>Медицинский тест (100 вопросов)</title>
     <style>
         :root {
-            --primary: #007AFF; /* iOS Blue */
-            --success: #34C759; /* iOS Green */
+            --primary: #007AFF;
+            --success: #34C759;
             --success-bg: #E8F8EC;
-            --error: #FF3B30;   /* iOS Red */
+            --error: #FF3B30;
             --error-bg: #FFE5E5;
-            --bg: #F2F2F7;      /* iOS Grouped Background */
+            --bg: #F2F2F7;
             --card-bg: #FFFFFF;
             --text: #000000;
             --text-secondary: #8E8E93;
@@ -24,7 +23,7 @@
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            -webkit-tap-highlight-color: transparent; /* Убирает серую подсветку при тапе на iOS */
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
@@ -32,7 +31,6 @@
             background-color: var(--bg);
             color: var(--text);
             line-height: 1.5;
-            /* Отступы для челки и нижней полосы iPhone */
             padding-top: env(safe-area-inset-top);
             padding-bottom: calc(40px + env(safe-area-inset-bottom));
             -webkit-font-smoothing: antialiased;
@@ -73,7 +71,7 @@
             color: white;
             border: none;
             padding: 8px 16px;
-            border-radius: 18px; /* iOS pill shape */
+            border-radius: 18px;
             cursor: pointer;
             font-size: 15px;
             font-weight: 600;
@@ -118,7 +116,7 @@
         }
 
         .question-text {
-            font-size: 17px; /* Оптимально для чтения на iPhone */
+            font-size: 17px;
             font-weight: 600;
             margin-bottom: 16px;
             color: var(--text);
@@ -135,12 +133,12 @@
             display: block;
             width: 100%;
             text-align: left;
-            padding: 16px 18px; /* Увеличенная область касания (min 44px по гайдлайнам Apple) */
+            padding: 16px 18px;
             border: 1px solid #C6C6C8;
             border-radius: 10px;
             background: #FFFFFF;
             color: var(--text);
-            font-size: 16px; /* 16px предотвращает авто-зум на iOS при фокусе */
+            font-size: 16px;
             font-weight: 400;
             cursor: pointer;
             transition: all 0.15s ease;
@@ -195,10 +193,144 @@
             opacity: 0.5;
         }
 
-        /* Адаптация для очень маленьких экранов (iPhone SE) */
+        /* --- Стили для модального окна результатов --- */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.4);
+            -webkit-backdrop-filter: blur(8px);
+            backdrop-filter: blur(8px);
+            z-index: 1000;
+            align-items: flex-end; /* На iPhone удобно снизу, на десктопе по центру */
+            justify-content: center;
+        }
+
+        @media (min-width: 600px) {
+            .modal-overlay {
+                align-items: center;
+            }
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--card-bg);
+            width: 100%;
+            max-width: 600px;
+            max-height: 85vh;
+            border-radius: 20px 20px 0 0;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            animation: slideUp 0.3s ease-out;
+        }
+
+        @media (min-width: 600px) {
+            .modal-content {
+                border-radius: 20px;
+                margin: 20px;
+            }
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+
+        .modal-header {
+            text-align: center;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #E5E5EA;
+            padding-bottom: 16px;
+        }
+
+        .modal-title {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .score-display {
+            font-size: 36px;
+            font-weight: 800;
+            color: var(--primary);
+            margin: 8px 0;
+        }
+
+        .score-text {
+            font-size: 15px;
+            color: var(--text-secondary);
+        }
+
+        .results-list {
+            flex: 1;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            padding-right: 4px;
+            margin-bottom: 20px;
+        }
+
+        .result-item {
+            background: #F9F9F9;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+            border-left: 4px solid var(--error);
+        }
+
+        .result-item.perfect {
+            border-left-color: var(--success);
+            background: var(--success-bg);
+        }
+
+        .result-q {
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text);
+        }
+
+        .result-ans {
+            font-size: 14px;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+        }
+
+        .result-ans.wrong { color: var(--error); }
+        .result-ans.right { color: var(--success); font-weight: 600; }
+
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn-modal {
+            flex: 1;
+            padding: 14px;
+            border-radius: 12px;
+            border: none;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .btn-primary:active { opacity: 0.8; }
+
         @media (max-width: 380px) {
             .question-text { font-size: 16px; }
             .option-btn { font-size: 15px; padding: 14px 16px; }
+            .score-display { font-size: 28px; }
         }
     </style>
 </head>
@@ -217,8 +349,26 @@
         <div id="quiz-container"></div>
     </div>
 
+    <!-- Модальное окно результатов -->
+    <div id="results-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">Тест завершен!</div>
+                <div class="score-display"><span id="final-score">0</span> / <span id="total-score">100</span></div>
+                <div class="score-text" id="score-percentage">0% правильных ответов</div>
+            </div>
+            
+            <div id="results-list-container" class="results-list">
+                <!-- Сюда будут добавлены ошибки или сообщение об успехе -->
+            </div>
+
+            <div class="modal-actions">
+                <button class="btn-modal btn-primary" onclick="resetQuiz()">Пройти тест заново</button>
+            </div>
+        </div>
+    </div>
+
     <script>
-        // База вопросов с индексами правильных ответов (0-based), строго по вашему файлу
         const quizData = [
             {q:"ЧТО ИЗ ПЕРЕЧИСЛЕННЫХ НИЖЕ МЕРОПРИЯТИЙ НЕ ПОКАЗАНО ПРИ СТЕНОЗЕ ГОРТАНИ 2 СТЕПЕНИ", o:["отвлекающая терапия","ингаляции с гидрокортизоном","теплое питье (молоко с щелочной мин. водой)","глюкокортикоиды в/м","трахеостомия"], c:4},
             {q:"ТИПИЧНОЙ ЛОКАЛИЗАЦИЕЙ СЫПИ ПРИ КРАСНУХЕ ЯВЛЯЕТСЯ", o:["сгибательные поверхности конечностей","поэтапное распространение сыпи на лице, туловище, конечностях","туловище, конечности с концентрацией элементов на стопах, кистях, вокруг суставов","боковые поверхности туловища, внутренняя поверхность бедер","лицо, туловище, разгибательные поверхности конечностей, ягодицы"], c:4},
@@ -324,8 +474,8 @@
 
         let currentQuizData = [];
         let answeredCount = 0;
+        let quizResults = []; // Хранилище результатов для итоговой статистики
 
-        // Алгоритм Фишера-Йетса для перемешивания массива
         function shuffleArray(array) {
             const shuffled = [...array];
             for (let i = shuffled.length - 1; i > 0; i--) {
@@ -335,20 +485,12 @@
             return shuffled;
         }
 
-        // Подготовка данных: перемешиваем вопросы И варианты ответов внутри них
         function prepareQuizData() {
             const shuffledQuestions = shuffleArray(quizData);
-            
             return shuffledQuestions.map(item => {
-                // Запоминаем текст правильного ответа до перемешивания
                 const correctAnswerText = item.o[item.c];
-                
-                // Перемешиваем варианты ответов
                 const shuffledOptions = shuffleArray(item.o);
-                
-                // Находим новый индекс правильного ответа в перемешанном массиве
                 const newCorrectIndex = shuffledOptions.indexOf(correctAnswerText);
-                
                 return {
                     q: item.q,
                     o: shuffledOptions,
@@ -359,13 +501,15 @@
 
         function initQuiz() {
             currentQuizData = prepareQuizData();
+            answeredCount = 0;
+            quizResults = [];
+            document.getElementById('results-modal').classList.remove('active');
             renderQuiz();
         }
 
         function renderQuiz() {
             const container = document.getElementById('quiz-container');
             container.innerHTML = '';
-            answeredCount = 0;
             updateStats();
 
             currentQuizData.forEach((item, index) => {
@@ -406,11 +550,19 @@
 
             if (btnElement.disabled) return;
 
-            buttons.forEach(b => {
-                b.disabled = true;
+            buttons.forEach(b => b.disabled = true);
+
+            const isCorrect = selectedOptIndex === correctIndex;
+            
+            // Сохраняем результат для итоговой статистики
+            quizResults.push({
+                question: currentQuizData[qIndex].q,
+                selectedAnswer: currentQuizData[qIndex].o[selectedOptIndex],
+                correctAnswer: currentQuizData[qIndex].o[correctIndex],
+                isCorrect: isCorrect
             });
 
-            if (selectedOptIndex === correctIndex) {
+            if (isCorrect) {
                 btnElement.classList.add('correct');
             } else {
                 btnElement.classList.add('incorrect');
@@ -419,6 +571,11 @@
 
             answeredCount++;
             updateStats();
+
+            // Проверка на завершение теста
+            if (answeredCount === currentQuizData.length) {
+                setTimeout(showResults, 600); // Небольшая задержка для плавности UX
+            }
         }
 
         function updateStats() {
@@ -426,11 +583,45 @@
             document.getElementById('total-count').textContent = currentQuizData.length;
         }
 
-        function resetQuiz() {
-            if (confirm('Сбросить тест и перемешать вопросы и варианты ответов заново?')) {
-                initQuiz();
-                window.scrollTo({ top: 0, behavior: 'smooth' });
+        function showResults() {
+            const correctCount = quizResults.filter(r => r.isCorrect).length;
+            const total = quizResults.length;
+            const percentage = Math.round((correctCount / total) * 100);
+
+            document.getElementById('final-score').textContent = correctCount;
+            document.getElementById('total-score').textContent = total;
+            document.getElementById('score-percentage').textContent = `${percentage}% правильных ответов`;
+
+            const listContainer = document.getElementById('results-list-container');
+            listContainer.innerHTML = '';
+
+            const incorrectResults = quizResults.filter(r => !r.isCorrect);
+
+            if (incorrectResults.length === 0) {
+                listContainer.innerHTML = `
+                    <div class="result-item perfect">
+                        <div class="result-q">🎉 Поздравляем! Вы ответили правильно на все вопросы!</div>
+                    </div>
+                `;
+            } else {
+                incorrectResults.forEach((res, idx) => {
+                    const item = document.createElement('div');
+                    item.className = 'result-item';
+                    item.innerHTML = `
+                        <div class="result-q">${idx + 1}. ${res.question}</div>
+                        <div class="result-ans wrong">✗ Ваш ответ: ${res.selectedAnswer}</div>
+                        <div class="result-ans right">✓ Правильно: ${res.correctAnswer}</div>
+                    `;
+                    listContainer.appendChild(item);
+                });
             }
+
+            document.getElementById('results-modal').classList.add('active');
+        }
+
+        function resetQuiz() {
+            initQuiz();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         document.addEventListener('DOMContentLoaded', initQuiz);
